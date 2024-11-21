@@ -1,164 +1,199 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=none">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="author" content="Chami">
-    <meta name="description" content="Páginas de Chami">
-    <link rel="icon" href="https://dl.dir.freefiremobile.com/common/test/official/FF_SHORT_LOGO.PNG.png" type="image/png">
-    <title>Liga FF</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Chami">
+  <meta name="description" content="Páginas de Chami">
+  <title>Liga FF</title>
+  <link rel="icon" href="https://dl.dir.freefiremobile.com/common/test/official/FF_SHORT_LOGO.PNG.png" type="image/png">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-        :root {
-            --canvas-color: #121212;
-            --card-color: #1E1E1E;
-            --accent-color: #BB86FC;
-            --primary-text-color: #FFFFFF;
-            --primary-text-color-light: #B3B3B3;
-            --secondary-text-color: #EFBFFF;
-        }
+    :root {
+      --canvas-color: #121212;
+      --card-color: #1E1E1E;
+      --accent-color: #BB86FC;
+      --primary-text-color: #FFFFFF;
+      --primary-text-color-light: #B3B3B3;
+      --secondary-text-color: #EFBFFF;
+    }
 
-        body {
-            font-family: "DM Sans", "Inter", sans-serif;
-            background-color: var(--canvas-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin: 0;
-            padding: 20px;
-            user-select: none;
-        }
+    body {
+      font-family: "DM Sans", "Inter", sans-serif;
+      background-color: var(--canvas-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 30px;
+      user-select: none;
+    }
 
-        .player {
-            width: 340px;
-            height: 170px;
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            position: relative;
-            background-color: var(--card-color);
-            display: flex;
-            flex-shrink: 1;
-        }
+    hr {
+      width: 100%;
+      border: none;
+      height: 2px;
+      background-color: rgba(0, 0, 0, 0);
+      margin: 10px 0;
+    }
 
-        .player-info {
-            padding: 2.5rem 0 0 2rem;
-            display: flex;
-            flex-grow: 1;
-            position: relative;
-        }
+    #players-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
 
-        .player-name {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-text-color);
-        }
+    .player {
+      width: 340px;
+      height: 170px;
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      position: relative;
+      background-color: var(--card-color);
+      display: flex;
+      flex-shrink: 1;
+      margin: 0 auto;
+    }
 
-        .player-team {
-            font-size: 1rem;
-            font-weight: 400;
-            color: var(--primary-text-color-light);
-            display: block;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-        }
+    .player-info {
+      padding: 2.5rem 0 0 2rem;
+      display: flex;
+      flex-grow: 1;
+      position: relative;
+    }
 
-        .player-stats {
-            border-radius: 15px;
-            background-color: rgba(50, 0, 0, 0.7);
-            box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3);
-            width: 280px;
-            position: absolute;
-            left: -30px;
-            top: -28px;
-            display: flex;
-            justify-content: space-between;
-            padding: 1rem 1.5rem;
-        }
+    .player-name {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-text-color);
+    }
 
-        .player-stat {
-            font-size: 0.7rem;
-            color: var(--secondary-text-color);
-            text-transform: uppercase;
-        }
+    .player-team {
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--primary-text-color-light);
+      display: block;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
 
-        .player-stat-number {
-            margin-top: 0rem;
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--secondary-text-color);
-        }
+    .player-stats {
+      border-radius: 15px;
+      background-color: rgba(50, 0, 0, 0.7);
+      box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3);
+      width: 280px;
+      position: absolute;
+      left: -30px;
+      top: -28px;
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+    }
 
-        .player-image {
-            display: flex;
-            position: relative;
-            width: 200px;
-        }
+    .player-stat {
+      font-size: 0.7rem;
+      color: var(--secondary-text-color);
+      text-transform: uppercase;
+    }
 
-        .player-image img {
-            display: block;
-            position: absolute;
-            width: 300px;
-            left: -10px;
-            bottom: -52px;
-        }
-    </style>
+    .player-stat-number {
+      margin-top: 0rem;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--secondary-text-color);
+    }
+
+    .player-image {
+      display: flex;
+      position: absolute;
+      width: 200px;
+      left: 200px;
+    }
+
+    .player-image img {
+      display: block;
+      position: absolute;
+      width: 300px;
+      top: -70px;
+    }
+  </style>
 </head>
-
 <body>
-    <hr style="width: 100%; margin-bottom: 30px; margin-top: 30px;">
-    <div class="player">
-        <div class="player-info">
-            <h2 class="player-name"><span class="player-team">Jonathan Encina</span>Chami</h2>
-            <dl class="player-stats">
-                <div>
-                    <dt class="player-stat">Jugadas</dt>
-                    <dd class="player-stat-number">0</dd>
-                </div>
-                <div>
-                    <dt class="player-stat">Victorias</dt>
-                    <dd class="player-stat-number">0</dd>
-                </div>
-                <div>
-                    <dt class="player-stat">Kills</dt>
-                    <dd class="player-stat-number">0</dd>
-                </div>
-            </dl>
-        </div>
-        <div class="player-image">
-            <img src="https://um2411.renderforest.com/u25148551/visuals/9e30ac51-9522-440a-ab6c-f33d7a60bc65.png" />
-        </div>
-    </div>
-    <hr style="width: 100%; margin-bottom: 30px; margin-top: 30px;">
-    <div class="player">
-        <div class="player-info">
-            <h2 class="player-name"><span class="player-team">Clara Barraza</span>BlsTah</h2>
-            <dl class="player-stats">
-                <div>
-                    <dt class="player-stat">Jugadas</dt>
-                    <dd class="player-stat-number">0</dd>
-                </div>
-                <div>
-                    <dt class="player-stat">Victorias</dt>
-                    <dd class="player-stat-number">0</dd>
-                </div>
-                <div>
-                    <dt class="player-stat">Kills</dt>
-                    <dd class="player-stat-number">0</dd>
-                </div>
-            </dl>
-        </div>
-        <div class="player-image">
-            <img src="https://um2411.renderforest.com/u25148551/visuals/ab17e68f-f95d-4f69-a771-24565b95a02a.png" />
-        </div>
-    </div>
-    <hr style="width: 100%; margin-bottom: 30px; margin-top: 30px;">
-</body>
+  <div id="players-container"></div>
 
+  <script type="module">
+    // Importar Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyC8dFQsswHsGjzMLsoH-TxpdAcDDPjVzno",
+      authDomain: "points-chami-clara.firebaseapp.com",
+      databaseURL: "https://points-chami-clara-default-rtdb.firebaseio.com",
+      projectId: "points-chami-clara",
+      storageBucket: "points-chami-clara.firebasestorage.app",
+      messagingSenderId: "892484314390",
+      appId: "1:892484314390:web:a52d0eb98fa654e3abdc37"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Referencia a los datos de jugadores
+    const playersRef = ref(database, 'players');
+
+    // Contenedor de jugadores
+    const playersContainer = document.getElementById('players-container');
+
+    // Escuchar cambios en la base de datos
+    onValue(playersRef, (snapshot) => {
+      const players = snapshot.val();
+
+      // Limpiar contenido previo
+      playersContainer.innerHTML = '';
+
+      // Renderizar jugadores dinámicamente con separadores
+      for (const key in players) {
+        const player = players[key];
+
+        const playerCard = `
+          <hr>
+          <div class="player">
+            <div class="player-info">
+              <h2 class="player-name">
+                <span class="player-team">${player.team}</span>${player.name}
+              </h2>
+              <dl class="player-stats">
+                <div>
+                  <dt class="player-stat">Jugadas</dt>
+                  <dd class="player-stat-number">${player.stats.gamesPlayed}</dd>
+                </div>
+                <div>
+                  <dt class="player-stat">Victorias</dt>
+                  <dd class="player-stat-number">${player.stats.victories}</dd>
+                </div>
+                <div>
+                  <dt class="player-stat">Kills</dt>
+                  <dd class="player-stat-number">${player.stats.kills}</dd>
+                </div>
+              </dl>
+            </div>
+            <div class="player-image">
+              <img src="${player.image}" alt="${player.name}">
+            </div>
+          </div>
+          <hr>
+        `;
+        playersContainer.innerHTML += playerCard;
+      }
+    });
+  </script>
+</body>
 </html>
