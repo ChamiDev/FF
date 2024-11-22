@@ -34,11 +34,13 @@
         }
 
         #players-container {
-            display: flex;
-            flex-direction: column;
+            display: grid;
             gap: 20px;
             width: 100%;
-            max-width: 600px;
+            max-width: 1200px;
+            margin: 0 auto;
+            grid-template-columns: repeat(auto-fit, 340px); /* Ancho fijo de las tarjetas */
+            justify-content: center;
         }
 
         .player {
@@ -49,8 +51,6 @@
             position: relative;
             background-color: var(--card-color);
             display: flex;
-            flex-shrink: 1;
-            margin: 0 auto;
             overflow: hidden;
         }
 
@@ -146,78 +146,80 @@
         }
     </style>
 </head>
+
 <body>
-  <div id="players-container"></div>
+    <div id="players-container"></div>
 
-  <script type="module">
-    // Importar Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+    <script type="module">
+        // Importar Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-    // Configuración de Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyC8dFQsswHsGjzMLsoH-TxpdAcDDPjVzno",
-      authDomain: "points-chami-clara.firebaseapp.com",
-      databaseURL: "https://points-chami-clara-default-rtdb.firebaseio.com",
-      projectId: "points-chami-clara",
-      storageBucket: "points-chami-clara.firebasestorage.app",
-      messagingSenderId: "892484314390",
-      appId: "1:892484314390:web:a52d0eb98fa654e3abdc37"
-    };
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8dFQsswHsGjzMLsoH-TxpdAcDDPjVzno",
+            authDomain: "points-chami-clara.firebaseapp.com",
+            databaseURL: "https://points-chami-clara-default-rtdb.firebaseio.com",
+            projectId: "points-chami-clara",
+            storageBucket: "points-chami-clara.firebasestorage.app",
+            messagingSenderId: "892484314390",
+            appId: "1:892484314390:web:a52d0eb98fa654e3abdc37"
+        };
 
-    // Inicializar Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
-    // Referencia a los datos de jugadores
-    const playersRef = ref(database, 'players');
+        // Referencia a los datos de jugadores
+        const playersRef = ref(database, 'players');
 
-    // Contenedor de jugadores
-    const playersContainer = document.getElementById('players-container');
+        // Contenedor de jugadores
+        const playersContainer = document.getElementById('players-container');
 
-    // Escuchar cambios en la base de datos
-    onValue(playersRef, (snapshot) => {
-      const players = snapshot.val();
+        // Escuchar cambios en la base de datos
+        onValue(playersRef, (snapshot) => {
+            const players = snapshot.val();
 
-      // Limpiar contenido previo
-      playersContainer.innerHTML = '';
+            // Limpiar contenido previo
+            playersContainer.innerHTML = '';
 
-      // Renderizar jugadores dinámicamente con separadores
-      for (const key in players) {
-        const player = players[key];
+            // Renderizar jugadores dinámicamente
+            for (const key in players) {
+                const player = players[key];
 
-        const playerCard = `
-          <div class="player">
-            <div class="player-info">
-              <h2 class="player-name">
-                <span class="player-team">${player.name}</span>. ${player.team}
-              </h2>
-              <dl class="player-stats">
-                <div>
-                  <dt class="player-stat">Jugadas</dt>
-                  <dd class="player-stat-number">${player.stats.gamesPlayed}</dd>
-                </div>
-                <div>
-                  <dt class="player-stat">Victorias</dt>
-                  <dd class="player-stat-number">${player.stats.victories}</dd>
-                </div>
-                <div>
-                  <dt class="player-stat">Kills</dt>
-                  <dd class="player-stat-number">${player.stats.kills}</dd>
-                </div>
-              </dl>
-            </div>
-            <div class="player-image">
-              <img src="${player.image}" alt="${player.name}">
-            </div>
-            <div class="play-circle" onclick="window.open('${player.link}', '_blank')">
-              <div class="play-arrow"></div>
-            </div>
-          </div>
-        `;
-        playersContainer.innerHTML += playerCard;
-      }
-    });
-  </script>
+                const playerCard = `
+                    <div class="player">
+                        <div class="player-info">
+                            <h2 class="player-name">
+                                <span class="player-team">${player.name}</span>. ${player.team}
+                            </h2>
+                            <dl class="player-stats">
+                                <div>
+                                    <dt class="player-stat">Jugadas</dt>
+                                    <dd class="player-stat-number">${player.stats.gamesPlayed}</dd>
+                                </div>
+                                <div>
+                                    <dt class="player-stat">Victorias</dt>
+                                    <dd class="player-stat-number">${player.stats.victories}</dd>
+                                </div>
+                                <div>
+                                    <dt class="player-stat">Kills</dt>
+                                    <dd class="player-stat-number">${player.stats.kills}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div class="player-image">
+                            <img src="${player.image}" alt="${player.name}">
+                        </div>
+                        <div class="play-circle" onclick="window.open('${player.link}', '_blank')">
+                            <div class="play-arrow"></div>
+                        </div>
+                    </div>
+                `;
+                playersContainer.innerHTML += playerCard;
+            }
+        });
+    </script>
 </body>
+
 </html>
