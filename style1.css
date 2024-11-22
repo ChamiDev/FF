@@ -84,13 +84,14 @@
             font-size: 0.7rem;
             color: var(--secondary-text-color);
             text-transform: uppercase;
-            position: absolute;
+            z-index: 10;
         }
 
         .player-stat-number {
             font-size: 20px;
             font-weight: 700;
             color: var(--secondary-text-color);
+            z-index: 10;
         }
 
         .player-image {
