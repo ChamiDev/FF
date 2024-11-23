@@ -8,12 +8,304 @@
     <meta name="description" content="Tabla de la Liga de Free Fire">
     <title>Liga FF</title>
     <link rel="icon" href="https://dl.dir.freefiremobile.com/common/test/official/FF_SHORT_LOGO.PNG.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
 
-    <meta http-equiv="refresh" content="0; url=https://console.firebase.google.com/u/0/project/points-chami-clara/database/points-chami-clara-default-rtdb/data/~2Fplayers">
-    
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .player-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #333333;
+            border-radius: 8px;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .player-info img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .player-stats {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-stats span {
+            margin-bottom: 5px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #444;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #333333;
+            color: #ffffff;
+        }
+
+        .code-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212;
+        }
+
+        .code-box {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            margin-right: 10px;
+        }
+
+        input[type="submit"] {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 
 <body>
+
+    <div class="code-container" id="codeContainer">
+        <div class="code-box">
+            <h2>Ingrese el código para acceder:</h2>
+            <form id="codeForm">
+                <input type="text" id="codeInput" placeholder="Código" required>
+                <input type="submit" value="Acceder">
+            </form>
+        </div>
+    </div>
+
+    <div class="container" id="mainContent" style="display: none;">
+        <div class="header">
+            <h1>Panel de Jugadores</h1>
+            <p>Administrar estadísticas de los jugadores</p>
+        </div>
+
+        <div id="playersContainer"></div>
+
+        <h3>Tabla de Posiciones</h3>
+        <table id="rankingTable">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Victorias</th>
+                    <th>Kills</th>
+                    <th>Jugadas</th>
+                </tr>
+            </thead>
+            <tbody id="rankingBody">
+                <!-- Aquí se mostrarán los jugadores ordenados -->
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8dFQsswHsGjzMLsoH-TxpdAcDDPjVzno",
+            authDomain: "points-chami-clara.firebaseapp.com",
+            databaseURL: "https://points-chami-clara-default-rtdb.firebaseio.com",
+            projectId: "points-chami-clara",
+            storageBucket: "points-chami-clara.firebasestorage.app",
+            messagingSenderId: "892484314390",
+            appId: "1:892484314390:web:a52d0eb98fa654e3abdc37"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Función para cargar jugadores
+        function loadPlayers() {
+            const playersRef = ref(db, 'players');
+            get(playersRef).then(snapshot => {
+                const players = snapshot.val();
+                const playersContainer = document.getElementById('playersContainer');
+                const rankingBody = document.getElementById('rankingBody');
+                playersContainer.innerHTML = ''; // Limpiar contenido previo
+                rankingBody.innerHTML = ''; // Limpiar tabla de posiciones
+
+                Object.keys(players).forEach(playerId => {
+                    const player = players[playerId];
+
+                    // Crear panel para cada jugador
+                    const playerPanel = document.createElement('div');
+                    playerPanel.classList.add('player-panel');
+                    playerPanel.innerHTML = `
+                        <div class="player-info">
+                            <img src="${player.image}" alt="${player.name}">
+                            <div class="player-stats">
+                                <span><strong>${player.name}</strong></span>
+                                <span>Victorias: ${player.stats.victories}</span>
+                                <span>Kills: ${player.stats.kills}</span>
+                                <span>Jugadas: ${player.stats.gamesPlayed}</span>
+                            </div>
+                        </div>
+                        <div class="buttons">
+                            <button class="increase-victories" data-player-id="${playerId}">+ Victorias</button>
+                            <button class="decrease-victories" data-player-id="${playerId}">- Victorias</button>
+                            <button class="increase-kills" data-player-id="${playerId}">+ Kills</button>
+                            <button class="decrease-kills" data-player-id="${playerId}">- Kills</button>
+                            <button class="increase-games" data-player-id="${playerId}">+ Jugadas</button>
+                            <button class="decrease-games" data-player-id="${playerId}">- Jugadas</button>
+                        </div>
+                    `;
+                    playersContainer.appendChild(playerPanel);
+
+                    // Añadir a la tabla de posiciones
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${player.name}</td>
+                        <td>${player.stats.victories}</td>
+                        <td>${player.stats.kills}</td>
+                        <td>${player.stats.gamesPlayed}</td>
+                    `;
+                    rankingBody.appendChild(row);
+                });
+
+                // Agregar event listeners a los botones después de que los jugadores se carguen
+                document.querySelectorAll('.increase-victories').forEach(button => {
+                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'victories', 1));
+                });
+
+                document.querySelectorAll('.decrease-victories').forEach(button => {
+                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'victories', -1));
+                });
+
+                document.querySelectorAll('.increase-kills').forEach(button => {
+                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'kills', 1));
+                });
+
+                document.querySelectorAll('.decrease-kills').forEach(button => {
+                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'kills', -1));
+                });
+
+                document.querySelectorAll('.increase-games').forEach(button => {
+                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'gamesPlayed', 1));
+                });
+
+                document.querySelectorAll('.decrease-games').forEach(button => {
+                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'gamesPlayed', -1));
+                });
+            });
+        }
+
+        // Función para aumentar o disminuir las estadísticas de un jugador
+        function increaseStat(playerId, stat, amount) {
+            console.log(`Modificando ${stat} de ${playerId} por ${amount}`); // Depuración
+            const playerRef = ref(db, 'players/' + playerId);
+            get(playerRef).then(snapshot => {
+                const player = snapshot.val();
+                if (player) {
+                    const updatedStats = { ...player.stats, [stat]: player.stats[stat] + amount };
+
+                    console.log(`Actualizando stats de ${playerId}:`, updatedStats); // Depuración
+
+                    // Usar set() para actualizar el objeto completo del jugador
+                    set(playerRef, {
+                        image: player.image,
+                        name: player.name,
+                        stats: updatedStats
+                    });
+                }
+            });
+        }
+
+        // Verificación de código
+        document.getElementById('codeForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const codeInput = document.getElementById('codeInput').value;
+
+            if (codeInput === '16100811') {
+                // Código correcto, mostrar el contenido principal
+                document.getElementById('codeContainer').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                loadPlayers(); // Cargar jugadores
+            } else {
+                alert('Código incorrecto. Acceso denegado.');
+            }
+        });
+    </script>
 </body>
 
 </html>
