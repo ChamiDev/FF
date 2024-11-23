@@ -55,13 +55,14 @@ body {
 
 .fire {
   position: absolute;
-  top: calc(50% - 12.5px);
-  left: calc(50% - 12.5px);
+  top: calc(50% - 12.5px + 25px); /* Mueve 25px más abajo */
+  left: calc(50% - 12.5px + 25px); /* Mueve 25px más a la derecha */
   width: 25px;
   height: 25px;
   background-color: transparent;
   margin: 0 auto;
 }
+
 
 .fire-center {
   position: absolute;
