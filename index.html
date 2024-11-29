@@ -9,7 +9,7 @@
     <title>Liga FF</title>
     <link rel="icon" href="https://dl.dir.freefiremobile.com/common/test/official/FF_SHORT_LOGO.PNG.png" type="image/png">
     <meta name="stylesheet" content="styles.css">
-    <link rel="stylesheet" href="css.css">
+    <link rel="stylesheet" href="src/css.css">
 </head>
 
 <body>
@@ -17,7 +17,6 @@
         <div class="carga"></div>
     </div>
     <div id="players-container"></div>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
@@ -38,13 +37,11 @@
     const playersRef = ref(database, 'players');
     const playersContainer = document.getElementById('players-container');
 
-    // Cargar sonidos
     const killSound = new Audio('KILL.OGG');
     const winSound = new Audio('WIN.OGG');
 
-    let previousStats = {}; // Guardará los datos anteriores para detectar cambios
+    let previousStats = {}; 
 
-    // Función para mostrar el mensaje emergente
     function mostrarEmergente(playerName, action) {
         const emergente = document.createElement('div');
         emergente.id = 'emergente';
@@ -53,7 +50,7 @@
 
         setTimeout(() => {
             emergente.remove();
-        }, 5000); // 5 segundos, coincide con la duración de la animación flip
+        }, 5000); 
     }
 
     onValue(playersRef, (snapshot) => {
@@ -90,33 +87,27 @@
                 `
                 : '';
 
-            // Detectar cambios en las estadísticas
             if (previousStats[key]) {
                 const previous = previousStats[key].stats;
                 const current = player.stats;
 
-                // Detectar aumento en kills
                 if (current.kills > previous.kills) {
                     killSound.play();
-                    mostrarEmergente(player.name, 'Sumo una kill!');
+                    mostrarEmergente(player.name, 'hizo una kill!');
                 }
 
-                // Detectar aumento en jugadas
                 if (current.gamesPlayed > previous.gamesPlayed) {
                    mostrarEmergente(player.name, 'Se unio a la partida!');
                 }
 
-                // Detectar aumento en victorias
                 if (current.victories > previous.victories) {
                     winSound.play();
                     mostrarEmergente(player.name, 'ha ganado la partida!');
                 }
             }
 
-            // Actualizar el registro de estadísticas anteriores
             previousStats[key] = player;
 
-            // Crear las tarjetas de los jugadores
             const playerCard = `
               <div class="player">
                 <div class="player-info">
@@ -126,11 +117,11 @@
                     <div>
                       <dt class="player-stat">Jugadas</dt>
                       <dd class="player-stat-number">${player.stats.gamesPlayed}</dd>
-                    </div>
+                    </div><hr>
                     <div>
                       <dt class="player-stat">Victorias</dt>
                       <dd class="player-stat-number">${player.stats.victories}</dd>
-                    </div>
+                    </div><hr>
                     <div>
                       <dt class="player-stat">Kills</dt>
                       <dd class="player-stat-number">
@@ -142,9 +133,6 @@
                 </div>
                 <div class="player-image">
                   <img src="${player.image}" alt="${player.name}">
-                </div>
-                <div class="play-circle" onclick="window.open('${player.link}', '_blank')">
-                  <div class="play-arrow"></div>
                 </div>
               </div>
             `;
