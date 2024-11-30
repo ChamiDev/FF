@@ -37,9 +37,10 @@
     const playersRef = ref(database, 'players');
     const playersContainer = document.getElementById('players-container');
 
-    const killSound = new Audio('KILL.OGG');
-    const winSound = new Audio('WIN.OGG');
-
+    const killSound = new Audio('src/KILL.OGG');
+    const winSound = new Audio('src/WIN.OGG');
+    const joinSound = new Audio('src/JOIN.OGG');
+    
     let previousStats = {}; 
 
     function mostrarEmergente(playerName, action) {
@@ -97,6 +98,7 @@
                 }
 
                 if (current.gamesPlayed > previous.gamesPlayed) {
+                    joinSound.play();
                    mostrarEmergente(player.name, 'Se unio a la partida!');
                 }
 
