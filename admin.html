@@ -10,7 +10,7 @@
     <link rel="icon" href="https://dl.dir.freefiremobile.com/common/test/official/FF_SHORT_LOGO.PNG.png" type="image/png">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #121212;
@@ -18,71 +18,29 @@
         }
 
         .container {
-            max-width: 100%;
+            max-width: 90%;
             margin: 20px auto;
             padding: 20px;
             background-color: #1e1e1e;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
         }
 
         .header {
             text-align: center;
             margin-bottom: 20px;
             color: #ffffff;
-        }
-
-        .player-panel {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #333333;
-            border-radius: 8px;
-        }
-
-        .player-info {
-            display: flex;
-            align-items: center;
-        }
-
-        .player-info img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .player-stats {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .player-stats span {
-            margin-bottom: 5px;
-        }
-
-        .buttons {
-            display: flex;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #45a049;
+            font-size: 24px;
+            font-weight: bold;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 30px;
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
         }
 
         table,
@@ -91,15 +49,43 @@
             border: 1px solid #444;
         }
 
-        th,
-        td {
-            padding: 10px;
-            text-align: center;
-        }
-
         th {
             background-color: #333333;
             color: #ffffff;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 15px;
+            text-align: center;
+            font-size: 16px;
+            color: #f0f0f0;
+        }
+
+        td button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        td button:hover {
+            transform: scale(1.1);
+            background-color: #45a049;
+        }
+
+        td button.decrease {
+            background-color: #f44336;
+        }
+
+        td button.decrease:hover {
+            background-color: #e53935;
         }
 
         .code-container {
@@ -112,25 +98,31 @@
 
         .code-box {
             background-color: #1e1e1e;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            color: #f0f0f0;
         }
 
         input[type="text"] {
-            padding: 8px;
+            padding: 10px;
             border-radius: 5px;
             border: 1px solid #444;
             margin-right: 10px;
+            width: 200px;
+            background-color: #222;
+            color: #f0f0f0;
         }
 
         input[type="submit"] {
-            padding: 8px 15px;
+            padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
         }
 
         input[type="submit"]:hover {
@@ -152,14 +144,7 @@
     </div>
 
     <div class="container" id="mainContent" style="display: none;">
-        <div class="header">
-            <h1>Panel de Jugadores</h1>
-            <p>Administrar estadísticas de los jugadores</p>
-        </div>
-
-        <div id="playersContainer"></div>
-
-        <h3>Tabla de Posiciones</h3>
+        <div class="header">Tabla de Posiciones</div>
         <table id="rankingTable">
             <thead>
                 <tr>
@@ -177,7 +162,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC8dFQsswHsGjzMLsoH-TxpdAcDDPjVzno",
@@ -192,112 +177,59 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Función para cargar jugadores
         function loadPlayers() {
             const playersRef = ref(db, 'players');
             get(playersRef).then(snapshot => {
                 const players = snapshot.val();
-                const playersContainer = document.getElementById('playersContainer');
                 const rankingBody = document.getElementById('rankingBody');
-                playersContainer.innerHTML = ''; // Limpiar contenido previo
-                rankingBody.innerHTML = ''; // Limpiar tabla de posiciones
+                rankingBody.innerHTML = '';
 
                 Object.keys(players).forEach(playerId => {
                     const player = players[playerId];
-
-                    // Crear panel para cada jugador
-                    const playerPanel = document.createElement('div');
-                    playerPanel.classList.add('player-panel');
-                    playerPanel.innerHTML = `
-                        <div class="player-info">
-                            <img src="${player.image}" alt="${player.name}">
-                            <div class="player-stats">
-                                <span><strong>${player.name}</strong></span>
-                                <span>Victorias: ${player.stats.victories}</span>
-                                <span>Kills: ${player.stats.kills}</span>
-                                <span>Jugadas: ${player.stats.gamesPlayed}</span>
-                            </div>
-                        </div>
-                        <div class="buttons">
-                            <button class="increase-victories" data-player-id="${playerId}">+ Victorias</button>
-                            <button class="decrease-victories" data-player-id="${playerId}">- Victorias</button>
-                            <button class="increase-kills" data-player-id="${playerId}">+ Kills</button>
-                            <button class="decrease-kills" data-player-id="${playerId}">- Kills</button>
-                            <button class="increase-games" data-player-id="${playerId}">+ Jugadas</button>
-                            <button class="decrease-games" data-player-id="${playerId}">- Jugadas</button>
-                        </div>
-                    `;
-                    playersContainer.appendChild(playerPanel);
-
-                    // Añadir a la tabla de posiciones
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${player.name}</td>
-                        <td>${player.stats.victories}</td>
-                        <td>${player.stats.kills}</td>
-                        <td>${player.stats.gamesPlayed}</td>
+                        <td>
+                            <button class="decrease" onclick="updateStat('${playerId}', 'victories', -1)">-</button>
+                            ${player.stats.victories}
+                            <button onclick="updateStat('${playerId}', 'victories', 1)">+</button>
+                        </td>
+                        <td>
+                            <button class="decrease" onclick="updateStat('${playerId}', 'kills', -1)">-</button>
+                            ${player.stats.kills}
+                            <button onclick="updateStat('${playerId}', 'kills', 1)">+</button>
+                        </td>
+                        <td>
+                            <button class="decrease" onclick="updateStat('${playerId}', 'gamesPlayed', -1)">-</button>
+                            ${player.stats.gamesPlayed}
+                            <button onclick="updateStat('${playerId}', 'gamesPlayed', 1)">+</button>
+                        </td>
                     `;
                     rankingBody.appendChild(row);
-                });
-
-                // Agregar event listeners a los botones después de que los jugadores se carguen
-                document.querySelectorAll('.increase-victories').forEach(button => {
-                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'victories', 1));
-                });
-
-                document.querySelectorAll('.decrease-victories').forEach(button => {
-                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'victories', -1));
-                });
-
-                document.querySelectorAll('.increase-kills').forEach(button => {
-                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'kills', 1));
-                });
-
-                document.querySelectorAll('.decrease-kills').forEach(button => {
-                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'kills', -1));
-                });
-
-                document.querySelectorAll('.increase-games').forEach(button => {
-                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'gamesPlayed', 1));
-                });
-
-                document.querySelectorAll('.decrease-games').forEach(button => {
-                    button.addEventListener('click', () => increaseStat(button.dataset.playerId, 'gamesPlayed', -1));
                 });
             });
         }
 
-        // Función para aumentar o disminuir las estadísticas de un jugador
-        function increaseStat(playerId, stat, amount) {
-            console.log(`Modificando ${stat} de ${playerId} por ${amount}`); // Depuración
+        window.updateStat = function(playerId, stat, amount) {
             const playerRef = ref(db, 'players/' + playerId);
             get(playerRef).then(snapshot => {
                 const player = snapshot.val();
                 if (player) {
-                    const updatedStats = { ...player.stats, [stat]: player.stats[stat] + amount };
-
-                    console.log(`Actualizando stats de ${playerId}:`, updatedStats); // Depuración
-
-                    // Usar set() para actualizar el objeto completo del jugador
-                    set(playerRef, {
-                        image: player.image,
-                        name: player.name,
-                        stats: updatedStats
-                    });
+                    player.stats[stat] += amount;
+                    set(playerRef, player);
+                    loadPlayers();
                 }
             });
-        }
+        };
 
-        // Verificación de código
-        document.getElementById('codeForm').addEventListener('submit', function (event) {
+        document.getElementById('codeForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const codeInput = document.getElementById('codeInput').value;
 
             if (codeInput === '16100811') {
-                // Código correcto, mostrar el contenido principal
                 document.getElementById('codeContainer').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
-                loadPlayers(); // Cargar jugadores
+                loadPlayers();
             } else {
                 alert('Código incorrecto. Acceso denegado.');
             }
