@@ -13,9 +13,14 @@
 </head>
 
 <body>
-    <div id="loader">
-        <div class="carga"></div>
-    </div>
+  <div class="background-container" id="background"></div>
+
+  <script>
+    // Añadir el filtro oscuro después de 1 segundo
+    setTimeout(() => {
+      document.getElementById('background').classList.add('dark-filter');
+    }, 1000);
+  </script>
     <div id="players-container"></div>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
@@ -141,20 +146,8 @@
             playersContainer.innerHTML += playerCard;
         }
     });
-
-    window.onload = function () {
-        document.body.style.visibility = 'visible';
-        document.getElementById('loader').style.display = 'none';
-    };
 </script>
-  <div class="background-container" id="background"></div>
 
-  <script>
-    // Añadir el filtro oscuro después de 1 segundo
-    setTimeout(() => {
-      document.getElementById('background').classList.add('dark-filter');
-    }, 1000);
-  </script>
 </body>
 
 </html>
