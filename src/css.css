@@ -29,7 +29,7 @@
     /* Clase para aplicar el filtro de brillo oscuro */
 
     .dark-filter {
-        filter: brightness(10%);
+        filter: brightness(10%) blur(5px);
     }
 
     body {
