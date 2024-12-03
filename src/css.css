@@ -10,7 +10,24 @@
         --primary-text-color-light: #B3B3B3;
         --secondary-text-color: #EFBFFF;
     }
+    /* Contenedor de fondo */
+    .background-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background-image: url('https://um2412.renderforest.com/u25148551/visuals/0707a977-bcdc-4669-b387-3eb84006f363.jpg');
+      background-size: cover;
+      background-position: center;
+      z-index: -1;
+      transition: filter 1s ease-in-out;
+    }
 
+    /* Clase para aplicar el filtro de brillo oscuro */
+    .dark-filter {
+      filter: brightness(50%);
+    }
     body {
         font-family: "DM Sans", "Inter", sans-serif;
         background-color: var(--canvas-color);
