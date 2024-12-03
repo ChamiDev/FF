@@ -147,7 +147,14 @@
         document.getElementById('loader').style.display = 'none';
     };
 </script>
+  <div class="background-container" id="background"></div>
 
+  <script>
+    // Añadir el filtro oscuro después de 1 segundo
+    setTimeout(() => {
+      document.getElementById('background').classList.add('dark-filter');
+    }, 1000);
+  </script>
 </body>
 
 </html>
