@@ -1,15 +1,129 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="Chami">
-    <meta name="description" content="Tabla de la Liga de Free Fire">
-    <title>Liga FF</title>
-    <link rel="icon" href="https://dl.dir.freefiremobile.com/common/test/official/FF_SHORT_LOGO.PNG.png" type="image/png">
-    <meta name="stylesheet" content="styles.css">
-    <link rel="stylesheet" href="src/css.css">
+    <title>Player Stats - Radar Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8dFQsswHsGjzMLsoH-TxpdAcDDPjVzno",
+            authDomain: "points-chami-clara.firebaseapp.com",
+            databaseURL: "https://points-chami-clara-default-rtdb.firebaseio.com",
+            projectId: "points-chami-clara",
+            storageBucket: "points-chami-clara.firebasestorage.app",
+            messagingSenderId: "892484314390",
+            appId: "1:892484314390:web:a52d0eb98fa654e3abdc37",
+            measurementId: "G-47FJ1BMDJY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        async function fetchData() {
+            const dbRef = ref(database, 'players');
+            try {
+                const snapshot = await get(dbRef);
+                if (snapshot.exists()) {
+                    const playersData = snapshot.val();
+                    displayPlayers(playersData);
+                } else {
+                    console.log("No data available");
+                }
+            } catch (error) {
+                console.error("Error fetching data: ", error);
+            }
+        }
+
+        function displayPlayers(playersData) {
+            const playerList = document.getElementById("playerList");
+            const maxStats = { kills: 0, headshotKills: 0, booyahs: 0, damage: 0, gamesPlayed: 0 };
+
+            // Calculate max values for each stat
+            for (const key in playersData) {
+                const stats = playersData[key].stats;
+                maxStats.kills = Math.max(maxStats.kills, stats.kills);
+                maxStats.headshotKills = Math.max(maxStats.headshotKills, stats.headshotKills);
+                maxStats.booyahs = Math.max(maxStats.booyahs, stats.booyahs);
+                maxStats.damage = Math.max(maxStats.damage, stats.damage);
+                maxStats.gamesPlayed = Math.max(maxStats.gamesPlayed, stats.gamesPlayed);
+            }
+
+            // Render each player
+            for (const playerKey in playersData) {
+                const player = playersData[playerKey];
+                const stats = player.stats;
+
+                const playerElement = document.createElement("div");
+                playerElement.classList.add("player");
+
+                // Normalize stats to range 0-10 based on max stats
+                const normalizedStats = {
+                    kills: Math.round((stats.kills / maxStats.kills) * 10) || 0,
+                    headshotKills: Math.round((stats.headshotKills / maxStats.headshotKills) * 10) || 0,
+                    booyahs: Math.round((stats.booyahs / maxStats.booyahs) * 10) || 0,
+                    damage: Math.round((stats.damage / maxStats.damage) * 10) || 0,
+                    gamesPlayed: Math.round((stats.gamesPlayed / maxStats.gamesPlayed) * 10) || 0
+                };
+
+                let badgeHTML = '';
+
+                // Add badges based on max stats
+                if (stats.kills === maxStats.kills) {
+                    badgeHTML += `<img src="https://um2025.renderforest.com/u25148551/visuals/74bcf49b-0263-4b8a-a4c0-70c67135b5bb.png" class="badge" alt="Top Kills">`;
+                }
+                if (stats.booyahs === maxStats.booyahs) {
+                    badgeHTML += `<img src="https://um2025.renderforest.com/u25148551/visuals/dc6b3f2b-2356-41a7-9310-dbec57d5bff7.png" class="badge" alt="Top Booyah">`;
+                }
+                if (stats.headshotKills === maxStats.headshotKills) {
+                    badgeHTML += `<img src="https://um2025.renderforest.com/u25148551/visuals/a679f6eb-de1f-47be-90d7-10dbc96f1d6a.png" class="badge" alt="Top Headshots">`;
+                }
+
+                playerElement.innerHTML = `
+                    <img src="${player.image}" alt="${player.name}" class="player-image">
+                    <h3>${player.name}</h3>
+                    <div class="badges">${badgeHTML}</div>
+                    <canvas id="chart-${playerKey}" width="250" height="250"></canvas>
+                `;
+                playerList.appendChild(playerElement);
+
+                // Create radar chart
+                const ctx = document.getElementById(`chart-${playerKey}`).getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Kills', 'Headshots', 'Booyahs', 'Damage', 'Games Played'],
+                        datasets: [{
+                            label: player.name,
+                            data: [
+                                normalizedStats.kills,
+                                normalizedStats.headshotKills,
+                                normalizedStats.booyahs,
+                                normalizedStats.damage,
+                                normalizedStats.gamesPlayed
+                            ],
+                            backgroundColor: 'rgba(139, 0, 255, 0.3)', // Accent color for the player
+                            borderColor: 'rgba(139, 0, 255, 1)', // Accent border
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 2, max: 10 }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        window.onload = fetchData;
+    </script>
     <style>
         * {
             box-sizing: border-box;
@@ -25,7 +139,6 @@
         }
 
         /* Contenedor de fondo */
-
         .background-container {
             position: fixed;
             top: 0;
@@ -37,10 +150,10 @@
             background-position: center;
             z-index: -1;
             transition: filter 1s ease-in-out;
+            filter: brightness(100%);
         }
 
-        /* Clase para aplicar el filtro de brillo oscuro */
-
+        /* Filtro oscuro */
         .dark-filter {
             filter: brightness(10%) blur(5px);
         }
@@ -56,517 +169,85 @@
             user-select: none;
         }
 
-        #loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.8);
-            /* Fondo negro */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .carga {
-            width: 90%;
-            height: 10px;
-            background: linear-gradient(#F4F100 0 0) left/0% 100% no-repeat #FFFFFF;
-            animation: p1 4s infinite linear;
-        }
-
-        @keyframes p1 {
-            100% {
-                background-size: 100% 100%;
-            }
-        }
-
-        #players-container {
-            display: grid;
-            gap: 20px;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            grid-template-columns: repeat(auto-fit, 400px);
-            justify-content: center;
+        h1 {
+            color: var(--primary-text-color);
+            font-size: 2.5rem;
+            text-shadow: 0px 0px 10px var(--accent-color);
+            margin-bottom: 40px;
         }
 
         .player {
-            width: 400px;
-            height: 120px;
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            position: relative;
-            background-color: var(--card-color);
-            display: flex;
-            flex-shrink: 1;
-            margin: 0 auto;
-            overflow: hidden;
-            transition: 0.3s ease-in-out;
+            background: var(--card-color);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px;
+            width: 250px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
         }
 
         .player:hover {
-            box-shadow: 0 0px 50px rgba(255, 0, 0, 0.5);
-            background-color: rgba(30, 0, 0);
-            height: 125px;
-            border-radius: 10px;
-        }
-
-        .player-info {
-            padding: 2.5rem 0 0 2rem;
-            display: flex;
-            flex-grow: 1;
-            position: relative;
-        }
-
-        .player-name {
-            font-size: 35px;
-            font-weight: 400;
-            color: var(--primary-text-color-light);
-            text-transform: uppercase;
-            position: absolute;
-            bottom: -22px;
-            left: 12px;
-        }
-
-        .player-stats {
-            border-radius: 15px;
-            background-color: rgba(50, 0, 0, 0.7);
-            box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3);
-            width: 300px;
-            height: 65px;
-            position: absolute;
-            left: -25px;
-            top: -50px;
-            display: flex;
-            justify-content: center;
-            padding: 1rem 1.5rem;
-        }
-
-        .player-stat {
-            font-size: 0.7rem;
-            color: var(--secondary-text-color);
-            text-transform: uppercase;
-        }
-
-        .player-stat-number {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--secondary-text-color);
+            transform: translateY(-5px);
         }
 
         .player-image {
-            display: flex;
-            position: absolute;
-            width: 200px;
-            left: 300px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
         }
 
-        .player-image img {
-            display: block;
-            position: absolute;
-            width: 100px;
+        h3 {
+            margin: 10px 0;
+            color: var(--primary-text-color);
         }
 
-        @keyframes scaleUpDown {
-            0%,
-            100% {
-                transform: scaleY(1) scaleX(1);
-            }
-            50%,
-            90% {
-                transform: scaleY(1.1);
-            }
-            75% {
-                transform: scaleY(0.95);
-            }
-            80% {
-                transform: scaleX(0.95);
-            }
+        canvas {
+            margin: 10px auto;
         }
 
-        @keyframes shake {
-            0%,
-            100% {
-                transform: skewX(0) scale(1);
-            }
-            50% {
-                transform: skewX(5deg) scale(0.9);
-            }
-        }
-
-        @keyframes particleUp {
-            0% {
-                opacity: 0;
-            }
-            20% {
-                opacity: 1;
-            }
-            80% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0;
-                top: -100%;
-                transform: scale(0.5);
-            }
-        }
-
-        @keyframes glow {
-            0%,
-            100% {
-                background-color: #ef5a00;
-            }
-            50% {
-                background-color: #ff7800;
-            }
-        }
-
-        .fire {
-            position: absolute;
-            top: calc(50% - 12.5px);
-            left: calc(50% - 12.5px);
+        .badge {
             width: 25px;
             height: 25px;
-            background-color: transparent;
-            margin: 0 auto;
-            z-index: 5;
-            opacity: 0.6;
-            transition: 0.3s ease-in-out;
         }
 
-        .fire:hover {
-            position: absolute;
-            top: calc(50% - 20px);
-            left: calc(50% - 17px);
-            width: 35px;
-            height: 35px;
-            background-color: transparent;
-            margin: 0 auto;
-            z-index: 5;
-            opacity: 0.9;
-        }
-
-        .fire-center {
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            animation: scaleUpDown 1.5s ease-out infinite both;
-            z-index: 5;
-        }
-
-        .fire-center .main-fire {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-image: radial-gradient(farthest-corner at 2.5px 0, #d43300 0%, #ef5a00 95%);
-            transform: scaleX(0.8) rotate(45deg);
-            border-radius: 0 40% 60% 40%;
-            filter: drop-shadow(0 0 2.5px #d43322);
-        }
-
-        .fire-center .particle-fire {
-            position: absolute;
-            top: 60%;
-            left: 45%;
-            width: 2.5px;
-            height: 2.5px;
-            background-color: #ef5a00;
-            border-radius: 50%;
-            filter: drop-shadow(0 0 2.5px #d43322);
-            animation: particleUp 1s ease-out infinite both;
-        }
-
-        .fire-right {
-            height: 100%;
-            width: 100%;
-            position: absolute;
-            animation: shake 1s ease-out infinite both;
-            z-index: 5;
-        }
-
-        .fire-right .main-fire {
-            position: absolute;
-            top: 15%;
-            right: -25%;
-            width: 80%;
-            height: 80%;
-            background-color: #ef5a00;
-            transform: scaleX(0.8) rotate(45deg);
-            border-radius: 0 40% 60% 40%;
-            filter: drop-shadow(0 0 2.5px #d43322);
-        }
-
-        .fire-right .particle-fire {
-            position: absolute;
-            top: 45%;
-            left: 50%;
-            width: 3.75px;
-            height: 3.75px;
-            background-color: #ef5a00;
-            transform: scaleX(0.8) rotate(45deg);
-            border-radius: 50%;
-            filter: drop-shadow(0 0 2.5px #d43322);
-            animation: particleUp 1s ease-out infinite both;
-        }
-
-        .fire-left {
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            animation: shake 1.5s ease-out infinite both;
-            z-index: 5;
-        }
-
-        .fire-left .main-fire {
-            position: absolute;
-            top: 15%;
-            left: -20%;
-            width: 80%;
-            height: 80%;
-            background-color: #ef5a00;
-            transform: scaleX(0.8) rotate(45deg);
-            border-radius: 0 40% 60% 40%;
-            filter: drop-shadow(0 0 2.5px #d43322);
-        }
-
-        .fire-left .particle-fire {
-            position: absolute;
-            top: 10%;
-            left: 20%;
-            width: 2.5px;
-            height: 2.5px;
-            background-color: #ef5a00;
-            border-radius: 50%;
-            filter: drop-shadow(0 0 2.5px #d43322);
-            animation: particleUp 1.5s ease-out infinite both;
-        }
-
-        .fire-bottom .main-fire {
-            position: absolute;
-            top: 30%;
-            left: 20%;
-            width: 75%;
-            height: 75%;
-            background-color: #ff7800;
-            transform: scaleX(0.8) rotate(45deg);
-            border-radius: 0 40% 100% 40%;
-            filter: blur(2.5px);
-            animation: glow 1s ease-out infinite both;
-            z-index: 5;
-        }
-
-        .player-stats {
-            z-index: 5;
-            position: relative;
-        }
-
-        .player-stat,
-        .player-stat-number {
-            z-index: 20;
-            position: relative;
-        }
-
-        .fire {
-            z-index: 10;
-            position: absolute;
-        }
-
-        #emergente {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            color: white;
-            background: linear-gradient(135deg, rgba(255, 85, 0, 0.95), rgba(255, 0, 0, 0.95));
-            border-radius: 20px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
-            padding: 12px 24px;
-            transform-origin: center;
-            animation: flip 5s ease-out forwards;
+        .badges {
             display: flex;
-            align-items: center;
             justify-content: center;
-            overflow: hidden;
-            margin-bottom: 30px;
-            letter-spacing: 1px;
-            position: fixed;
-            bottom: 10px;
-            z-index: 9999;
-            opacity: 0;
+            gap: 10px;
+            margin-top: 10px;
         }
 
-        @keyframes flip {
+        /* Fondo animado */
+        .background-container {
+            animation: fadeBackground 5s infinite alternate;
+        }
+
+        @keyframes fadeBackground {
             0% {
-                width: 0px;
-                height: 0px;
-                transform: scale(1) rotateY(0deg);
-                opacity: 0;
+                filter: brightness(100%);
             }
-            10% {
-                width: 80%;
-                height: 30px;
-                opacity: 1;
-            }
-            95% {
-                width: 98%;
-                height: 30px;
-                opacity: 1;
+            50% {
+                filter: brightness(50%) blur(2px);
             }
             100% {
-                width: 1px;
-                height: 1px;
-                opacity: 0;
+                filter: brightness(10%) blur(5px);
             }
-        }
-
-        #emergente:hover {
-            background: linear-gradient(135deg, rgba(255, 110, 0, 1), rgba(255, 50, 50, 1));
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
-            transform: scale(1.1);
-            transition: all 0.3s ease;
         }
     </style>
 </head>
-
 <body>
-  <div class="background-container" id="background"></div>
+    <div id="background" class="background-container"></div>
+    <h1>Player Stats - Radar Chart</h1>
+    <div id="playerList"></div>
 
-  <script>
-    // Añadir el filtro oscuro después de 1 segundo
-    setTimeout(() => {
-      document.getElementById('background').classList.add('dark-filter');
-    }, 1000);
-  </script>
-    <div id="players-container"></div>
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyC8dFQsswHsGjzMLsoH-TxpdAcDDPjVzno",
-        authDomain: "points-chami-clara.firebaseapp.com",
-        databaseURL: "https://points-chami-clara-default-rtdb.firebaseio.com",
-        projectId: "points-chami-clara",
-        storageBucket: "points-chami-clara.firebasestorage.app",
-        messagingSenderId: "892484314390",
-        appId: "1:892484314390:web:a52d0eb98fa654e3abdc37"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    const playersRef = ref(database, 'players');
-    const playersContainer = document.getElementById('players-container');
-
-    const killSound = new Audio('https://chamidev.github.io/FF/src/KILL.OGG');
-    const winSound = new Audio('https://chamidev.github.io/FF/src/WIN.OGG');
-    const joinSound = new Audio('https://chamidev.github.io/FF/src/JOIN.OGG');
-    
-    let previousStats = {}; 
-
-    function mostrarEmergente(playerName, action) {
-        const emergente = document.createElement('div');
-        emergente.id = 'emergente';
-        emergente.textContent = `${playerName} ${action}`;
-        document.body.appendChild(emergente);
-
+    <script>
+        // Añadir el filtro oscuro después de 1 segundo
         setTimeout(() => {
-            emergente.remove();
-        }, 5000); 
-    }
-
-    onValue(playersRef, (snapshot) => {
-        const players = snapshot.val();
-        const playersArray = Object.values(players);
-        const topKiller = playersArray.reduce((max, player) =>
-            player.stats.kills > max.stats.kills ? player : max, playersArray[0]);
-
-        playersContainer.innerHTML = '';
-
-        for (const key in players) {
-            const player = players[key];
-
-            const isTopKiller = player === topKiller;
-            const fireEffect = isTopKiller
-                ? `
-                  <div class="fire">
-                    <div class="fire-left">
-                      <div class="main-fire"></div>
-                      <div class="particle-fire"></div>
-                    </div>
-                    <div class="fire-center">
-                      <div class="main-fire"></div>
-                      <div class="particle-fire"></div>
-                    </div>
-                    <div class="fire-right">
-                      <div class="main-fire"></div>
-                      <div class="particle-fire"></div>
-                    </div>
-                    <div class="fire-bottom">
-                      <div class="main-fire"></div>
-                    </div>
-                  </div>
-                `
-                : '';
-
-            if (previousStats[key]) {
-                const previous = previousStats[key].stats;
-                const current = player.stats;
-
-                if (current.kills > previous.kills) {
-                    killSound.play();
-                    mostrarEmergente(player.name, 'hizo una kill!');
-                }
-
-                if (current.gamesPlayed > previous.gamesPlayed) {
-                    joinSound.play();
-                    mostrarEmergente(player.name, 'Se unio a la partida!');
-                }
-
-                if (current.victories > previous.victories) {
-                    winSound.play();
-                    mostrarEmergente(player.name, 'ha ganado la partida!');
-                }
-            }
-
-            previousStats[key] = player;
-
-            const playerCard = `
-              <div class="player">
-                <div class="player-info">
-                  <h2 class="player-name">${player.name}
-                  </h2>
-                  <dl class="player-stats">
-                    <div>
-                      <dt class="player-stat">Jugadas</dt>
-                      <dd class="player-stat-number">${player.stats.gamesPlayed}</dd>
-                    </div><hr>
-                    <div>
-                      <dt class="player-stat">Victorias</dt>
-                      <dd class="player-stat-number">${player.stats.victories}</dd>
-                    </div><hr>
-                    <div>
-                      <dt class="player-stat">Kills</dt>
-                      <dd class="player-stat-number">
-                        ${player.stats.kills}
-                        ${isTopKiller ? fireEffect : ''}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-                <div class="player-image">
-                  <img src="${player.image}" alt="${player.name}">
-                </div>
-              </div>
-            `;
-            playersContainer.innerHTML += playerCard;
-        }
-    });
-</script>
-
+            document.getElementById('background').classList.add('dark-filter');
+        }, 1000);
+    </script>
 </body>
-
 </html>
